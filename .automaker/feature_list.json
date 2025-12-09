@@ -95,6 +95,6 @@
     "category": "Kanban",
     "description": "Add a button in the backlog header which will just take the top cards and put them into the in progress board (up to the limit of the concurrency of course) so that a user doesn't have to drag each on individually, figure out the best name for it. give it a shortcut as well",
     "steps": [],
-    "status": "in_progress"
+    "status": "verified"
   }
 ]
