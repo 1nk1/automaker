@@ -25,7 +25,7 @@
     "category": "Kanban",
     "description": "In creating new cards in Kanban, I need the ability to drag and drop images into the description section, which will attach the image as context in store in the temp directory, so that later on when the agent runs, it can know where to fetch that image from.",
     "steps": [],
-    "status": "in_progress"
+    "status": "verified"
   },
   {
     "id": "feature-1765301184184-ttvhd8kkt",
