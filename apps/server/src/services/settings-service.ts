@@ -891,8 +891,9 @@ export class SettingsService {
       return { migrated: false, migratedFiles, legacyPath, errors };
     }
 
-    // Perform migration of entire directory
-    logger.info('Found legacy data directory, migrating all contents to new location...');
+    // Perform migration of specific application data files only
+    // (not Electron internal caches like Code Cache, GPU Cache, etc.)
+    logger.info('Found legacy data directory, migrating application data to new location...');
 
     // Ensure new data directory exists
     try {
@@ -904,8 +905,56 @@ export class SettingsService {
       return { migrated: false, migratedFiles, legacyPath, errors };
     }
 
-    // Recursively copy all files and directories
-    await this.copyDirectoryContents(legacyPath, this.dataDir, migratedFiles, errors);
+    // Only migrate specific application data files/directories
+    const itemsToMigrate = [
+      'settings.json',
+      'credentials.json',
+      'sessions-metadata.json',
+      'agent-sessions',
+      '.api-key',
+      '.sessions',
+    ];
+
+    for (const item of itemsToMigrate) {
+      const srcPath = path.join(legacyPath, item);
+      const destPath = path.join(this.dataDir, item);
+
+      // Check if source exists
+      try {
+        await fs.access(srcPath);
+      } catch {
+        // Source doesn't exist, skip
+        continue;
+      }
+
+      // Check if destination already exists
+      try {
+        await fs.access(destPath);
+        logger.debug(`Skipping ${item} - already exists in destination`);
+        continue;
+      } catch {
+        // Destination doesn't exist, proceed with copy
+      }
+
+      // Copy file or directory
+      try {
+        const stat = await fs.stat(srcPath);
+        if (stat.isDirectory()) {
+          await this.copyDirectory(srcPath, destPath);
+          migratedFiles.push(item + '/');
+          logger.info(`Migrated directory: ${item}/`);
+        } else {
+          const content = await fs.readFile(srcPath);
+          await fs.writeFile(destPath, content);
+          migratedFiles.push(item);
+          logger.info(`Migrated file: ${item}`);
+        }
+      } catch (error) {
+        const msg = `Failed to migrate ${item}: ${error}`;
+        logger.error(msg);
+        errors.push(msg);
+      }
+    }
 
     if (migratedFiles.length > 0) {
       logger.info(
@@ -924,74 +973,25 @@ export class SettingsService {
   }
 
   /**
-   * Recursively copy directory contents from source to destination
+   * Recursively copy a directory from source to destination
    *
    * @param srcDir - Source directory path
    * @param destDir - Destination directory path
-   * @param migratedFiles - Array to track migrated files
-   * @param errors - Array to track errors
-   * @param relativePath - Current relative path for logging
    */
-  private async copyDirectoryContents(
-    srcDir: string,
-    destDir: string,
-    migratedFiles: string[],
-    errors: string[],
-    relativePath: string = ''
-  ): Promise<void> {
-    try {
-      const entries = await fs.readdir(srcDir, { withFileTypes: true });
+  private async copyDirectory(srcDir: string, destDir: string): Promise<void> {
+    await fs.mkdir(destDir, { recursive: true });
+    const entries = await fs.readdir(srcDir, { withFileTypes: true });
 
-      for (const entry of entries) {
-        const srcPath = path.join(srcDir, entry.name);
-        const destPath = path.join(destDir, entry.name);
-        const itemRelativePath = relativePath ? path.join(relativePath, entry.name) : entry.name;
+    for (const entry of entries) {
+      const srcPath = path.join(srcDir, entry.name);
+      const destPath = path.join(destDir, entry.name);
 
-        // Skip if destination already exists
-        try {
-          await fs.access(destPath);
-          logger.debug(`Skipping ${itemRelativePath} - already exists in destination`);
-          continue;
-        } catch {
-          // Destination doesn't exist, proceed with copy
-        }
-
-        if (entry.isDirectory()) {
-          // Create directory and recursively copy contents
-          try {
-            await fs.mkdir(destPath, { recursive: true });
-            await this.copyDirectoryContents(
-              srcPath,
-              destPath,
-              migratedFiles,
-              errors,
-              itemRelativePath
-            );
-            migratedFiles.push(itemRelativePath + '/');
-            logger.info(`Migrated directory: ${itemRelativePath}/`);
-          } catch (error) {
-            const msg = `Failed to migrate directory ${itemRelativePath}: ${error}`;
-            logger.error(msg);
-            errors.push(msg);
-          }
-        } else if (entry.isFile()) {
-          // Copy file
-          try {
-            const content = await fs.readFile(srcPath);
-            await fs.writeFile(destPath, content);
-            migratedFiles.push(itemRelativePath);
-            logger.info(`Migrated file: ${itemRelativePath}`);
-          } catch (error) {
-            const msg = `Failed to migrate file ${itemRelativePath}: ${error}`;
-            logger.error(msg);
-            errors.push(msg);
-          }
-        }
+      if (entry.isDirectory()) {
+        await this.copyDirectory(srcPath, destPath);
+      } else if (entry.isFile()) {
+        const content = await fs.readFile(srcPath);
+        await fs.writeFile(destPath, content);
       }
-    } catch (error) {
-      const msg = `Failed to read directory ${srcDir}: ${error}`;
-      logger.error(msg);
-      errors.push(msg);
     }
   }
 }
