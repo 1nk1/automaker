@@ -146,11 +146,11 @@ export function createWorktreeRoutes(
   // Test runner routes
   router.post(
     '/start-tests',
-    validatePathParams('worktreePath'),
+    validatePathParams('worktreePath', 'projectPath?'),
     createStartTestsHandler(settingsService)
   );
   router.post('/stop-tests', createStopTestsHandler());
-  router.get('/test-logs', createGetTestLogsHandler());
+  router.get('/test-logs', validatePathParams('worktreePath?'), createGetTestLogsHandler());
 
   // Init script routes
   router.get('/init-script', createGetInitScriptHandler());
