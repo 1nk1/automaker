@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback, useDeferredValue, useRef } from 'reac
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createLogger } from '@automaker/utils/logger';
-import { UnifiedSidebar } from '@/components/layout/unified-sidebar';
+import { Sidebar } from '@/components/layout/sidebar';
 import {
   FileBrowserProvider,
   useFileBrowser,
@@ -860,7 +860,7 @@ function RootLayoutContent() {
             aria-hidden="true"
           />
         )}
-        <UnifiedSidebar />
+        <Sidebar />
         <div
           className="flex-1 flex flex-col overflow-hidden transition-all duration-300"
           style={{ marginRight: streamerPanelOpen ? '250px' : '0' }}
