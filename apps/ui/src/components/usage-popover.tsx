@@ -28,7 +28,6 @@ type UsageError = {
 // Fixed refresh interval (45 seconds)
 const REFRESH_INTERVAL_SECONDS = 45;
 const CLAUDE_SESSION_WINDOW_HOURS = 5;
-const CLAUDE_SESSION_WINDOW_BADGE = `${CLAUDE_SESSION_WINDOW_HOURS}h`;
 
 // Helper to format reset time for Codex
 function formatCodexResetTime(unixTimestamp: number): string {
@@ -265,17 +264,16 @@ export function UsagePopover() {
   const statusColor = getStatusInfo(tabInfo.percentage).color;
   const ProviderIcon = tabInfo.icon;
 
+  const indicatorTitle =
+    activeTab === 'claude' ? `Session usage (${CLAUDE_SESSION_WINDOW_HOURS}h window)` : 'Usage';
+
   const trigger = (
     <Button variant="ghost" size="sm" className="h-9 gap-2 bg-secondary border border-border px-3">
       {(claudeUsage || codexUsage) && <ProviderIcon className={cn('w-4 h-4', statusColor)} />}
       <span className="text-sm font-medium">Usage</span>
-      {activeTab === 'claude' && (
-        <span className="text-[10px] font-medium text-muted-foreground">
-          {CLAUDE_SESSION_WINDOW_BADGE}
-        </span>
-      )}
       {(claudeUsage || codexUsage) && (
         <div
+          title={indicatorTitle}
           className={cn(
             'h-1.5 w-16 bg-muted-foreground/20 rounded-full overflow-hidden transition-opacity',
             tabInfo.isStale && 'opacity-60'
