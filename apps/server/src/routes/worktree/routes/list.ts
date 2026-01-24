@@ -255,6 +255,8 @@ async function fetchGitHubPRs(
     // repeated API calls during GitHub API flakiness or temporary outages
     if (cached) {
       logger.warn(`Failed to fetch GitHub PRs, returning stale cache: ${getErrorMessage(error)}`);
+      // Extend cache TTL to avoid repeated retries during outages
+      githubPRCache.set(projectPath, { prs: cached.prs, fetchedAt: Date.now() });
       return cached.prs;
     }
     // No cache available, log warning and return empty map
