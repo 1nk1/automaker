@@ -195,14 +195,11 @@ async function fetchGitHubPRs(
   forceRefresh = false
 ): Promise<Map<string, WorktreePRInfo>> {
   const now = Date.now();
+  const cached = githubPRCache.get(projectPath);
 
-  if (!forceRefresh) {
-    const cached = githubPRCache.get(projectPath);
-    if (cached && now - cached.fetchedAt < GITHUB_PR_CACHE_TTL_MS) {
-      return cached.prs;
-    }
-  } else {
-    githubPRCache.delete(projectPath);
+  // Return cached result if valid and not forcing refresh
+  if (!forceRefresh && cached && now - cached.fetchedAt < GITHUB_PR_CACHE_TTL_MS) {
+    return cached.prs;
   }
 
   const prMap = new Map<string, WorktreePRInfo>();
@@ -248,12 +245,19 @@ async function fetchGitHubPRs(
       });
     }
 
+    // Only update cache on successful fetch
     githubPRCache.set(projectPath, {
       prs: prMap,
       fetchedAt: Date.now(),
     });
   } catch (error) {
-    // Silently fail - PR detection is optional
+    // On fetch failure, return stale cached data if available to avoid
+    // repeated API calls during GitHub API flakiness or temporary outages
+    if (cached) {
+      logger.warn(`Failed to fetch GitHub PRs, returning stale cache: ${getErrorMessage(error)}`);
+      return cached.prs;
+    }
+    // No cache available, log warning and return empty map
     logger.warn(`Failed to fetch GitHub PRs: ${getErrorMessage(error)}`);
   }
 
