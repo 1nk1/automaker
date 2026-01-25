@@ -41,10 +41,10 @@ export function registerShellHandlers(): void {
         // URL encode the path to handle special characters (spaces, brackets, etc.)
         // Handle both Unix (/) and Windows (\) path separators
         const normalizedPath = filePath.replace(/\\/g, '/');
-        const encodedPath = normalizedPath.startsWith('/')
-          ? '/' + normalizedPath.slice(1).split('/').map(encodeURIComponent).join('/')
-          : normalizedPath.split('/').map(encodeURIComponent).join('/');
-        let url = `vscode://file${encodedPath}`;
+        const segments = normalizedPath.split('/').map(encodeURIComponent);
+        const encodedPath = segments.join('/');
+        // VS Code URL format requires a leading slash after 'file'
+        let url = `vscode://file/${encodedPath}`;
         if (line !== undefined && line > 0) {
           url += `:${line}`;
           if (column !== undefined && column > 0) {

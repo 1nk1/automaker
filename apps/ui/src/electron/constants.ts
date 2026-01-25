@@ -22,8 +22,11 @@ export const DEFAULT_HEIGHT = 950;
 // When launched via root init.mjs we pass:
 // - PORT (backend)
 // - TEST_PORT (vite dev server / static)
-export const DEFAULT_SERVER_PORT = parseInt(process.env.PORT || '3008', 10);
-export const DEFAULT_STATIC_PORT = parseInt(process.env.TEST_PORT || '3007', 10);
+// Guard against NaN from non-numeric environment variables
+const parsedServerPort = Number.parseInt(process.env.PORT ?? '', 10);
+const parsedStaticPort = Number.parseInt(process.env.TEST_PORT ?? '', 10);
+export const DEFAULT_SERVER_PORT = Number.isFinite(parsedServerPort) ? parsedServerPort : 3008;
+export const DEFAULT_STATIC_PORT = Number.isFinite(parsedStaticPort) ? parsedStaticPort : 3007;
 
 // ============================================
 // File names for userData storage

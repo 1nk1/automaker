@@ -31,7 +31,7 @@ export function registerDialogHandlers(): void {
           ? `The selected directory is not allowed. Please select a directory within: ${allowedRoot}`
           : 'The selected directory is not allowed.';
 
-        await dialog.showErrorBox('Directory Not Allowed', errorMessage);
+        dialog.showErrorBox('Directory Not Allowed', errorMessage);
 
         return { canceled: true, filePaths: [] };
       }
@@ -41,16 +41,25 @@ export function registerDialogHandlers(): void {
   });
 
   // Open file dialog
-  ipcMain.handle(IPC_CHANNELS.DIALOG.OPEN_FILE, async (_, options = {}) => {
-    if (!state.mainWindow) {
-      return { canceled: true, filePaths: [] };
+  // Filter properties to maintain file-only intent and prevent renderer from requesting directories
+  ipcMain.handle(
+    IPC_CHANNELS.DIALOG.OPEN_FILE,
+    async (_, options: Record<string, unknown> = {}) => {
+      if (!state.mainWindow) {
+        return { canceled: true, filePaths: [] };
+      }
+      // Ensure openFile is always present and filter out directory-related properties
+      const inputProperties = (options.properties as string[]) ?? [];
+      const properties = ['openFile', ...inputProperties].filter(
+        (p) => p !== 'openDirectory' && p !== 'createDirectory'
+      );
+      const result = await dialog.showOpenDialog(state.mainWindow, {
+        ...options,
+        properties: properties as Electron.OpenDialogOptions['properties'],
+      });
+      return result;
     }
-    const result = await dialog.showOpenDialog(state.mainWindow, {
-      properties: ['openFile'],
-      ...options,
-    });
-    return result;
-  });
+  );
 
   // Save file dialog
   ipcMain.handle(IPC_CHANNELS.DIALOG.SAVE_FILE, async (_, options = {}) => {
