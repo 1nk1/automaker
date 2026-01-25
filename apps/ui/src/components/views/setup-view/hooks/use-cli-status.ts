@@ -5,7 +5,7 @@ import type { CliStatus, ClaudeAuthStatus, CodexAuthStatus } from '@/store/setup
 
 interface CliStatusApiResponse {
   success: boolean;
-  status?: 'installed' | 'not_installed';
+  status?: string;
   installed?: boolean;
   method?: string;
   version?: string;
@@ -14,12 +14,16 @@ interface CliStatusApiResponse {
     authenticated: boolean;
     method: string;
     hasCredentialsFile?: boolean;
+    hasToken?: boolean;
     hasStoredOAuthToken?: boolean;
     hasStoredApiKey?: boolean;
     hasEnvApiKey?: boolean;
     hasEnvOAuthToken?: boolean;
+    hasCliAuth?: boolean;
+    hasRecentActivity?: boolean;
     hasAuthFile?: boolean;
     hasApiKey?: boolean;
+    hasOAuthToken?: boolean;
   };
   error?: string;
 }

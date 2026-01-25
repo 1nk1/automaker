@@ -1416,10 +1416,15 @@ export interface ModelDefinition {
   id: string;
   name: string;
   modelString: string;
-  provider: 'claude';
-  description?: string;
-  tier?: 'basic' | 'standard' | 'premium';
+  provider: string;
+  description: string;
+  contextWindow?: number;
+  maxOutputTokens?: number;
+  supportsVision?: boolean;
+  supportsTools?: boolean;
+  tier?: 'basic' | 'standard' | 'premium' | string;
   default?: boolean;
+  hasReasoning?: boolean;
 }
 
 // Provider status type

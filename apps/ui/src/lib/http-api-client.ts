@@ -41,9 +41,9 @@ import type {
   Notification,
 } from '@automaker/types';
 import type { Message, SessionListItem } from '@/types/electron';
-import type { Feature, ClaudeUsageResponse, CodexUsageResponse } from '@/store/app-store';
+import type { ClaudeUsageResponse, CodexUsageResponse } from '@/store/app-store';
 import type { WorktreeAPI, GitAPI, ModelDefinition, ProviderStatus } from '@/types/electron';
-import type { ModelId, ThinkingLevel, ReasoningEffort } from '@automaker/types';
+import type { ModelId, ThinkingLevel, ReasoningEffort, Feature } from '@automaker/types';
 import { getGlobalFileBrowser } from '@/contexts/file-browser-context';
 
 const logger = createLogger('HttpClient');
@@ -161,7 +161,7 @@ const getServerUrl = (): string => {
 
     // In web mode (not Electron), use relative URL to leverage Vite proxy
     // This avoids CORS issues since requests appear same-origin
-    if (!window.electron) {
+    if (!window.Electron) {
       return '';
     }
   }
@@ -1723,12 +1723,16 @@ export class HttpApiClient implements ElectronAPI {
       error?: string;
     }> => this.get('/api/setup/copilot-status'),
 
-    onInstallProgress: (callback: (progress: unknown) => void) => {
-      return this.subscribeToEvent('agent:stream', callback);
+    onInstallProgress: (
+      callback: (progress: { cli?: string; data?: string; type?: string }) => void
+    ) => {
+      return this.subscribeToEvent('agent:stream', callback as EventCallback);
     },
 
-    onAuthProgress: (callback: (progress: unknown) => void) => {
-      return this.subscribeToEvent('agent:stream', callback);
+    onAuthProgress: (
+      callback: (progress: { cli?: string; data?: string; type?: string }) => void
+    ) => {
+      return this.subscribeToEvent('agent:stream', callback as EventCallback);
     },
   };
 

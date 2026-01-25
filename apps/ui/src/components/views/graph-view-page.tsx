@@ -149,33 +149,32 @@ export function GraphViewPage() {
       return;
     }
 
-    const unsubscribe = api.backlogPlan.onEvent(
-      (event: { type: string; result?: BacklogPlanResult; error?: string }) => {
-        logger.debug('Backlog plan event received', {
-          type: event.type,
-          hasResult: Boolean(event.result),
-          hasError: Boolean(event.error),
-        });
-        if (event.type === 'backlog_plan_complete') {
-          setIsGeneratingPlan(false);
-          if (event.result && event.result.changes?.length > 0) {
-            setPendingBacklogPlan(event.result);
-            toast.success('Plan ready! Click to review.', {
-              duration: 10000,
-              action: {
-                label: 'Review',
-                onClick: () => setShowPlanDialog(true),
-              },
-            });
-          } else {
-            toast.info('No changes generated. Try again with a different prompt.');
-          }
-        } else if (event.type === 'backlog_plan_error') {
-          setIsGeneratingPlan(false);
-          toast.error(`Plan generation failed: ${event.error}`);
+    const unsubscribe = api.backlogPlan.onEvent((data: unknown) => {
+      const event = data as { type: string; result?: BacklogPlanResult; error?: string };
+      logger.debug('Backlog plan event received', {
+        type: event.type,
+        hasResult: Boolean(event.result),
+        hasError: Boolean(event.error),
+      });
+      if (event.type === 'backlog_plan_complete') {
+        setIsGeneratingPlan(false);
+        if (event.result && event.result.changes?.length > 0) {
+          setPendingBacklogPlan(event.result);
+          toast.success('Plan ready! Click to review.', {
+            duration: 10000,
+            action: {
+              label: 'Review',
+              onClick: () => setShowPlanDialog(true),
+            },
+          });
+        } else {
+          toast.info('No changes generated. Try again with a different prompt.');
         }
+      } else if (event.type === 'backlog_plan_error') {
+        setIsGeneratingPlan(false);
+        toast.error(`Plan generation failed: ${event.error}`);
       }
-    );
+    });
 
     return unsubscribe;
   }, []);
@@ -211,7 +210,7 @@ export function GraphViewPage() {
     return hookFeatures.reduce(
       (counts, feature) => {
         if (feature.status !== 'completed') {
-          const branch = feature.branchName ?? 'main';
+          const branch = (feature.branchName as string | undefined) ?? 'main';
           counts[branch] = (counts[branch] || 0) + 1;
         }
         return counts;

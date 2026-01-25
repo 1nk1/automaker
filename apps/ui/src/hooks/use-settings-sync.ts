@@ -26,7 +26,6 @@ import {
   DEFAULT_MAX_CONCURRENCY,
   getAllOpencodeModelIds,
   getAllCursorModelIds,
-  getAllCodexModelIds,
   getAllGeminiModelIds,
   getAllCopilotModelIds,
   migrateCursorModelIds,
@@ -34,7 +33,6 @@ import {
   migratePhaseModelEntry,
   type GlobalSettings,
   type CursorModelId,
-  type CodexModelId,
   type GeminiModelId,
   type CopilotModelId,
 } from '@automaker/types';
@@ -76,8 +74,6 @@ const SETTINGS_FIELDS_TO_SYNC = [
   'cursorDefaultModel',
   'enabledOpencodeModels',
   'opencodeDefaultModel',
-  'enabledCodexModels',
-  'codexDefaultModel',
   'enabledGeminiModels',
   'geminiDefaultModel',
   'enabledCopilotModels',
@@ -585,22 +581,6 @@ export async function refreshSettingsFromServer(): Promise<boolean> {
       sanitizedEnabledOpencodeModels.push(sanitizedOpencodeDefaultModel);
     }
 
-    // Sanitize Codex models
-    const validCodexModelIds = new Set(getAllCodexModelIds());
-    const DEFAULT_CODEX_MODEL: CodexModelId = 'codex-gpt-5.2-codex';
-    const sanitizedEnabledCodexModels = (serverSettings.enabledCodexModels ?? []).filter(
-      (id): id is CodexModelId => validCodexModelIds.has(id as CodexModelId)
-    );
-    const sanitizedCodexDefaultModel = validCodexModelIds.has(
-      serverSettings.codexDefaultModel as CodexModelId
-    )
-      ? (serverSettings.codexDefaultModel as CodexModelId)
-      : DEFAULT_CODEX_MODEL;
-
-    if (!sanitizedEnabledCodexModels.includes(sanitizedCodexDefaultModel)) {
-      sanitizedEnabledCodexModels.push(sanitizedCodexDefaultModel);
-    }
-
     // Sanitize Gemini models
     const validGeminiModelIds = new Set(getAllGeminiModelIds());
     const sanitizedEnabledGeminiModels = (serverSettings.enabledGeminiModels ?? []).filter(
@@ -726,8 +706,6 @@ export async function refreshSettingsFromServer(): Promise<boolean> {
       cursorDefaultModel: sanitizedCursorDefault,
       enabledOpencodeModels: sanitizedEnabledOpencodeModels,
       opencodeDefaultModel: sanitizedOpencodeDefaultModel,
-      enabledCodexModels: sanitizedEnabledCodexModels,
-      codexDefaultModel: sanitizedCodexDefaultModel,
       enabledGeminiModels: sanitizedEnabledGeminiModels,
       geminiDefaultModel: sanitizedGeminiDefaultModel,
       enabledCopilotModels: sanitizedEnabledCopilotModels,
