@@ -86,8 +86,7 @@ export function IssueDetailPanel({
           {(() => {
             if (isValidating) {
               return (
-                <Button variant="default" size="sm" disabled>
-                  <Spinner size="sm" variant="foreground" className="mr-1" />
+                <Button variant="default" size="sm" disabled loading>
                   Validating...
                 </Button>
               );
@@ -335,15 +334,9 @@ export function IssueDetailPanel({
                       className="w-full"
                       onClick={loadMore}
                       disabled={loadingMore}
+                      loading={loadingMore}
                     >
-                      {loadingMore ? (
-                        <>
-                          <Spinner size="sm" className="mr-2" />
-                          Loading...
-                        </>
-                      ) : (
-                        'Load More Comments'
-                      )}
+                      {loadingMore ? 'Loading...' : 'Load More Comments'}
                     </Button>
                   )}
                 </div>
