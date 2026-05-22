@@ -88,9 +88,9 @@ Automaker leverages the [Claude Agent SDK](https://www.npmjs.com/package/@anthro
 >
 > This applies **only to Automaker's Claude provider**, which is built on the Claude Agent SDK. If you run agents with other providers (Codex, Copilot, Cursor, Gemini, OpenCode), they are billed through those services and are unaffected. Anthropic is moving programmatic Agent SDK usage out of your normal subscription rate limits and onto a **separate, dollar-denominated monthly credit pool**. Interactive use (Claude.ai chat, Claude Code in your terminal/IDE) keeps using your existing subscription limits, but the Agent SDK, the `claude -p` command, and apps built on it like Automaker draw from this new credit instead.
 >
-> - **Monthly credit by plan:** Pro `$20`, Max 5x `$100`, Max 20x `$200` (Team Standard `$20`, Team Premium `$100`, Enterprise `$20`–`$200`). Credit is metered at standard API rates, refreshes each billing cycle, and does **not** roll over.
+> - **Monthly credit by plan:** Pro `$20`, Max 5x `$100`, Max 20x `$200` (Team Standard `$20`, Team Premium `$100`, Enterprise `$20–$200`). Credit is metered at standard API rates, refreshes each billing cycle, and does **not** roll over.
 > - **You must claim the credit once.** It is a one-time opt-in through your Claude account; after that it refreshes automatically each cycle. Team/Enterprise admins receive instructions by email, and each member claims their own credit.
-> - **When the credit runs out:** further Agent SDK usage either flows to usage credits at standard API rates (only if you have usage credits enabled) or stops until the credit refreshes.
+> - **When the credit runs out:** Further Agent SDK usage either flows to usage credits at standard API rates (only if you have usage credits enabled) or stops until the credit refreshes.
 >
 > See Anthropic's [official guidance](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan) for the authoritative details.
 
